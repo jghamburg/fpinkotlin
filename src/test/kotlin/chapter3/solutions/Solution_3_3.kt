@@ -8,13 +8,14 @@ import io.kotlintest.shouldThrow
 import io.kotlintest.specs.WordSpec
 
 // tag::init[]
-fun <A> drop(l: List<A>, n: Int): List<A> =
-        if (n == 0) l
-        else when (l) {
-            is Cons -> drop(l.tail, n - 1)
-            is Nil -> throw IllegalStateException(
-                    "Cannot drop more elements than in list")
-        }
+tailrec fun <A> drop(l: List<A>, n: Int): List<A> =
+    if (n == 0) l
+    else when (l) {
+        is Cons -> drop(l.tail, n - 1)
+        is Nil -> throw IllegalStateException(
+            "Cannot drop more elements than in list"
+        )
+    }
 // end::init[]
 
 class Solution_3_3 : WordSpec({
@@ -27,10 +28,11 @@ class Solution_3_3 : WordSpec({
             drop(List.of(1, 2, 3, 4, 5), 5) shouldBe Nil
         }
 
-        "throw an illegal state exception when dropped elements exceed capacity" {
-            shouldThrow<IllegalStateException> {
-                drop(List.of(1, 2, 3, 4, 5), 6)
+        """throw an illegal state exception when dropped elements
+            exceed capacity""" {
+                shouldThrow<IllegalStateException> {
+                    drop(List.of(1, 2, 3, 4, 5), 6)
+                }
             }
-        }
     }
 })

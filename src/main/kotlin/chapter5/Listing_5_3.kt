@@ -20,50 +20,72 @@ object Listing_5_3 {
 
     //tag::exists1[]
     fun <A> Stream<A>.exists(p: (A) -> Boolean): Boolean =
-            when (this) {
-                is Cons -> p(this.h()) || this.t().exists(p)
-                else -> false
-            }
+        when (this) {
+            is Cons -> p(this.h()) || this.t().exists(p)
+            else -> false
+        }
     //end::exists1[]
 
     //tag::foldright[]
-    fun <A, B> Stream<A>.foldRight(z: () -> B, f: (A, () -> B) -> B): B = // <1>
-            when (this) {
-                is Cons -> f(this.h(), { t().foldRight(z, f) }) // <2>
-                else -> z()
-            }
+    fun <A, B> Stream<A>.foldRight(
+        z: () -> B,
+        f: (A, () -> B) -> B
+    ): B = // <1>
+        when (this) {
+            is Cons -> f(this.h()) { t().foldRight(z, f) } // <2>
+            else -> z()
+        }
     //end::foldright[]
 
     //tag::exists2[]
     fun <A> Stream<A>.exists2(p: (A) -> Boolean): Boolean =
-            foldRight({ false }, { a, b -> p(a) || b() })
+        foldRight({ false }, { a, b -> p(a) || b() })
     //end::exists2[]
 
-    val listing = {
+    val trace = {
         //tag::trace[]
-        Stream.of(1, 2, 3, 4).map { it + 10 }.filter { it % 2 == 0 }.toList()
+        Stream.of(1, 2, 3, 4).map { it + 10 }
+            .filter { it % 2 == 0 }
+            .map { it * 3 }.toList()
 
-        cons({ 11 }, { Stream.of(2, 3, 4) }).filter { it % 2 == 0 }.toList() // <1>
+        cons({ 11 }, { Stream.of(2, 3, 4) })
+            .filter { it % 2 == 0 }
+            .map { it * 3 }.toList() // <1>
 
-        Stream.of(2, 3, 4).map { it + 10 }.filter { it % 2 == 0 }.toList() // <2>
+        Stream.of(2, 3, 4).map { it + 10 }
+            .filter { it % 2 == 0 }
+            .map { it * 3 }.toList() // <2>
 
-        cons({ 12 }, { Stream.of(3, 4) }).filter { it % 2 == 0 }.toList() // <3>
+        cons({ 12 }, { Stream.of(3, 4) })
+            .filter { it % 2 == 0 }
+            .map { it * 3 }.toList() // <3>
 
-        ConsL(12, Stream.of(3, 4).map { it + 10 }.filter { it % 2 == 0 }.toList()) // <4>
+        ConsL(36, Stream.of(3, 4).map { it + 10 }
+            .filter { it % 2 == 0 }
+            .map { it * 3 }.toList()) // <4>
 
-        ConsL(12, cons({ 13 }, { Stream.of(4) }).filter { it % 2 == 0 }.toList())
+        ConsL(36, cons({ 13 }, { Stream.of(4) })
+                .filter { it % 2 == 0 }
+                .map { it * 3 }.toList()) // <5>
 
-        ConsL(12, Stream.of(4).map { it + 10 }.filter { it % 2 == 0 }.toList()) // <5>
+        ConsL(36, Stream.of(4).map { it + 10 }
+            .filter { it % 2 == 0 }
+            .map { it * 3 }.toList()) // <6>
 
-        ConsL(12, ConsL(14, Stream.empty<Int>().map { it + 10 }
-                .filter { it % 2 == 0 }.toList())) // <6>
+        ConsL(36, cons({ 14 })
+            .filter { it % 2 == 0 }
+            .map { it * 3 }.toList()) // <7>
 
-        ConsL(12, ConsL(14, NilL)) // <7>
+        ConsL(36, ConsL(42, Stream.empty<Int>().map { it + 10 }
+            .filter { it % 2 == 0 }
+            .map { it * 3 }.toList())) // <8>
+
+        ConsL(36, ConsL(42, NilL)) // <9>
         //end::trace[]
     }
 
     //tag::find[]
     fun <A> Stream<A>.find(p: (A) -> Boolean): Option<A> =
-            filter(p).headOption()
+        filter(p).headOption()
     //end::find[]
 }

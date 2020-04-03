@@ -6,46 +6,68 @@ import io.kotlintest.specs.WordSpec
 
 // tag::init[]
 fun <A, B> foldLeftR(xs: List<A>, z: B, f: (B, A) -> B): B =
-        (foldRight(xs, { b: B -> b }, { a, g -> { b -> g(f(b, a)) } }))(z)
+    foldRight(
+        xs,
+        { b: B -> b },
+        { a, g ->
+            { b ->
+                g(f(b, a))
+            }
+        })(z)
 
 fun <A, B> foldRightL(xs: List<A>, z: B, f: (A, B) -> B): B =
-        foldLeft(xs, { b: B -> b }, { g, a -> { b -> g(f(a, b)) } })(z)
+    foldLeft(xs,
+        { b: B -> b },
+        { g, a ->
+            { b ->
+                g(f(a, b))
+            }
+        })(z)
 
 //expanded example
 typealias Identity<B> = (B) -> B
 
-fun <A, B> foldLeftRLikeYouMeanIt(
-        ls: List<A>,
-        outerIdentity: B,
-        combiner: (B, A) -> B
+fun <A, B> foldLeftRDemystified(
+    ls: List<A>,
+    acc: B,
+    combiner: (B, A) -> B
 ): B {
 
-    val innerIdentity: Identity<B> = { b: B -> b }
+    val identity: Identity<B> = { b: B -> b }
 
     val combinerDelayer: (A, Identity<B>) -> Identity<B> =
-            { a: A, delayExec: Identity<B> ->
-                { b: B ->
-                    delayExec(combiner(b, a))
-                }
+        { a: A, delayedExec: Identity<B> ->
+            { b: B ->
+                delayedExec(combiner(b, a))
             }
+        }
 
-    fun go(combinerDelayer: (A, Identity<B>) -> Identity<B>): Identity<B> =
-            foldRight(ls, innerIdentity, combinerDelayer)
+    val chain: Identity<B> = foldRight(ls, identity, combinerDelayer)
 
-    return go(combinerDelayer).invoke(outerIdentity)
+    return chain(acc)
 }
 // end::init[]
 
 class Solution_3_12 : WordSpec({
     "list foldLeftR" should {
         "implement foldLeft functionality using foldRight" {
-            foldLeftR(List.of(1, 2, 3, 4, 5), 0, { x, y -> x + y }) shouldBe 15
+            foldLeftR(
+                List.of(1, 2, 3, 4, 5),
+                0,
+                { x, y -> x + y }) shouldBe 15
+            foldLeftRDemystified(
+                List.of(1, 2, 3, 4, 5),
+                0,
+                { x, y -> x + y }) shouldBe 15
         }
     }
 
     "list foldRightL" should {
         "implement foldRight functionality using foldLeft" {
-            foldRightL(List.of(1, 2, 3, 4, 5), 0, { x, y -> x + y }) shouldBe 15
+            foldRightL(
+                List.of(1, 2, 3, 4, 5),
+                0,
+                { x, y -> x + y }) shouldBe 15
         }
     }
 })

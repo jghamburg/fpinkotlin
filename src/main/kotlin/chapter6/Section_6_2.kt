@@ -1,13 +1,15 @@
 package chapter6
 
-import chapter6.Listing_6_1.RNG
-import chapter6.Listing_6_2.SimpleRNG
+import chapter6.Section_6_1.RNG
+import chapter6.Section_6_2.SimpleRNG
 
-object Listing_6_2 {
+object Section_6_2 {
     //tag::init[]
     data class SimpleRNG(val seed: Long) : RNG {
         override fun nextInt(): Pair<Int, RNG> {
-            val newSeed = (seed * 0x5DEECE66DL + 0xBL) and 0xFFFFFFFFFFFFL // <1>
+            val newSeed =
+                (seed * 0x5DEECE66DL + 0xBL) and
+                    0xFFFFFFFFFFFFL // <1>
             val nextRNG = SimpleRNG(newSeed) // <2>
             val n = (newSeed ushr 16).toInt() // <3>
             return Pair(n, nextRNG) // <4>

@@ -7,7 +7,7 @@ import io.kotlintest.specs.WordSpec
 
 //tag::init[]
 fun <A> Stream<A>.forAll(p: (A) -> Boolean): Boolean =
-        foldRight({ true }, { a, b -> p(a) && b() })
+    foldRight({ true }, { a, b -> p(a) && b() })
 //end::init[]
 
 class Solution_5_4 : WordSpec({
@@ -17,9 +17,10 @@ class Solution_5_4 : WordSpec({
             val s = Stream.of(1, 2, 3, 4, 5)
             s.forAll { it < 6 } shouldBe true
         }
-        "stop evaluating if one element does not satisfy the predicate" {
-            val s = Stream.of(1, 2, 3, 4, 5)
-            s.forAll { it != 3 } shouldBe false
-        }
+        """stop evaluating if one element does not satisfy
+            the predicate""" {
+                val s = Stream.of(1, 2, 3, 4, 5)
+                s.forAll { it != 3 } shouldBe false
+            }
     }
 })
